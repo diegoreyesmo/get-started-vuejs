@@ -6,7 +6,16 @@ var app = new Vue({
     },
     methods: {
         getJoke: function () {
-            this.joke = "some joke";
-      }
+            let fetchData = async () => {
+                let response = await fetch('http://api.icndb.com/jokes/random');
+                if (response.ok) { 
+                    let {value} = await response.json();
+                    this.joke = value.joke;
+                } else {
+                    alert("HTTP-Error: " + response.status);
+                }
+            }
+            fetchData();
+        }
     }
 })
