@@ -1,10 +1,14 @@
 <template>
   <v-container>
     <v-card>
-      <v-card-title>Quieres leer un chiste?</v-card-title>
+      <v-card-title>
+        <span v-if="count<=1">Un chiste?</span>
+        <span v-else>Varios chistes?</span>
+      </v-card-title>
       <v-card-text>
         <v-form v-model="valid">
           <v-overflow-btn
+            v-model="category"
             class="my-2"
             :items="this.categories"
             :rules="categoryRules"
@@ -12,14 +16,16 @@
             target="#dropdown-example-1"
             required
           ></v-overflow-btn>
+          <v-text-field v-model="count" type="number" class="form-control" required></v-text-field>
         </v-form>
       </v-card-text>
 
       <v-card-actions>
-        <v-btn color="primary" v-on:click="getJoke" :disabled="!valid">Obtener</v-btn>
+        <v-btn v-if="count<=1" color="primary" v-on:click="getJoke" :disabled="!valid">Cuéntamelo!</v-btn>
+        <v-btn v-else color="primary" v-on:click="getJoke" :disabled="!valid">Cuéntamelos!</v-btn>
       </v-card-actions>
       <v-card-text>
-        <p>{{ randomJoke }}</p>
+          <p v-for="item in randomJokes.value" v-bind:key="item.id">{{ item.joke }}</p>
       </v-card-text>
     </v-card>
   </v-container>
@@ -31,7 +37,8 @@ export default {
 
   data: () => ({
     valid: true,
-    randomJoke: "",
+    randomJokes: [],
+    category: null,
     categories: [],
     categoryRules: [(v) => !!v || "La categoría es requerida"],
     count: 1,
@@ -41,11 +48,12 @@ export default {
   },
   methods: {
     getJoke: function () {
+      let url = `http://api.icndb.com/jokes/random/${this.count}/?limitTo=[${this.category}]&escape=javascript`;
+      console.log(url);
       let fetchData = async () => {
-        let response = await fetch("http://api.icndb.com/jokes/random");
+        let response = await fetch(url);
         if (response.ok) {
-          let { value } = await response.json();
-          this.randomJoke = value.joke;
+          this.randomJokes = await response.json();
         } else {
           alert("HTTP-Error: " + response.status);
         }
