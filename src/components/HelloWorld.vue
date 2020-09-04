@@ -1,26 +1,27 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col>
-        <v-btn color="primary" v-on:click="getJoke">Cuéntame un chiste</v-btn>
-      </v-col>
-      <v-col>
+    <v-card>
+      <v-card-title>Quieres leer un chiste?</v-card-title>
+      <v-card-text>
+        <v-form v-model="valid">
+          <v-overflow-btn
+            class="my-2"
+            :items="this.categories"
+            :rules="categoryRules"
+            label="Categoría"
+            target="#dropdown-example-1"
+            required
+          ></v-overflow-btn>
+        </v-form>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-btn color="primary" v-on:click="getJoke" :disabled="!valid">Obtener</v-btn>
+      </v-card-actions>
+      <v-card-text>
         <p>{{ randomJoke }}</p>
-      </v-col>
-    </v-row>
-    <v-row class="text-center">
-      <v-col>
-        <v-overflow-btn
-          class="my-2"
-          :items="this.categorias"
-          label="Categoría"
-          target="#dropdown-example-1"
-        ></v-overflow-btn>
-      </v-col>
-      <v-col>
-        <input v-model.number="cantidad" type="number">
-      </v-col>
-    </v-row>
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>
 
@@ -29,12 +30,14 @@ export default {
   name: "HelloWorld",
 
   data: () => ({
+    valid: true,
     randomJoke: "",
-    categorias: [],
-    cantidad: 1
+    categories: [],
+    categoryRules: [(v) => !!v || "La categoría es requerida"],
+    count: 1,
   }),
   created() {
-    this.obtenerCategorias();
+    this.getCategories();
   },
   methods: {
     getJoke: function () {
@@ -49,12 +52,12 @@ export default {
       };
       fetchData();
     },
-    obtenerCategorias: function () {
+    getCategories: function () {
       let fetchData = async () => {
         let response = await fetch("http://api.icndb.com/categories");
         if (response.ok) {
           let { value } = await response.json();
-          this.categorias = value;
+          this.categories = value;
         } else {
           alert("HTTP-Error: " + response.status);
         }
